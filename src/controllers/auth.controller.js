@@ -24,14 +24,14 @@ async function registerController(req,res){
 
 
 async function loginController(req,res) {
-    const {username,passsword}=req.body
+    const {username,password}=req.body
     const user=await userModel.findOne({
         username
     })
     if(!user){
         return res.status(400).json({message:"user not found"})
     }
-    const isPasswordValid=user.password===passsword;
+    const isPasswordValid=await bcrypt.compare(password,user.password)
 
     if(!isPasswordValid){
         return res.status(400).json({message:"Invalid Password"})
@@ -41,7 +41,6 @@ async function loginController(req,res) {
         id:user._id
     },process.env.JWT_SECRET)
     res.cookie("token",token)
-
     res.status(200).json({
         message:"user logged in successfully",
         user:{
@@ -50,8 +49,6 @@ async function loginController(req,res) {
         }
 
     })
-    
-
 }
 
 module.exports={
